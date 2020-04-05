@@ -55,18 +55,9 @@ exports.Game = class game {
         return this.state.decks[playerId - 1];
     }
     playCard(playerId, cardIndex){
-        if (playerId != this.state.playersTurn) throw new Error(`Wrong player, please wait for turn of player ${this.state.playersTurn}.`);
-        this.state.playersTurn++;
-        if (this.state.playersTurn > this.state.players.length){
-            let firstColorInTrick = this.state.currentTrick[0][0];
-            var winnerCard = this.state.currentTrick.filter(c => c[0] === firstColorInTrick).reduce((prev, curr) => {
-                if(!prev || curr[1] > prev[1]) return curr;
-                else return prev;
-            });
-            let winner = this.state.currentTrick.indexOf(winnerCard) + 1;
-            this.state.tricks.push(winner);
-            this.state.playersTurn = 0;
-        }
+        if (playerId !== this.state.playersTurn) throw new Error(`Wrong player, please wait for turn of player ${this.state.playersTurn}.`);
+        if (cardIndex > this.state.decks[playerId -1].length || cardIndex < 0) throw new Error("Wrong card selected. Available cards: 0 - 3.");
+        // play card
         let deck = this.state.decks[playerId -1];
         let card = deck[cardIndex];
         let cardColor = card[0];
@@ -74,11 +65,30 @@ exports.Game = class game {
             let firstColorInTrick = this.state.currentTrick[0][0];
             if (firstColorInTrick !== cardColor &&
                 deck.filter(c => c[0] === firstColorInTrick).length > 0) {
-                throw new Error("Wrong color, please play color red.");
+                throw new Error(`Wrong color, please play color ${firstColorInTrick}.`);
             }
         }
+        deck.splice(cardIndex, 1);
         this.state.currentTrick.push(card);
-        return card;
+        // next player
+        if (++this.state.playersTurn > this.state.players.length){
+            this.state.playersTurn = 1;
+        }
+        // check for winner
+        if (this.state.currentTrick.length >= this.state.players.length){
+            let firstColorInTrick = this.state.currentTrick[0][0];
+            var winnerCard = this.state.currentTrick.filter(c => c[0] === firstColorInTrick).reduce((prev, curr) => {
+                if(!prev || curr[1] > prev[1]) return curr;
+                else return prev;
+            });
+            let winningTrickIndex = this.state.currentTrick.indexOf(winnerCard);
+            let winner = this.state.playersTurn + winningTrickIndex;
+            if(winner > this.state.players.length) winner -= this.state.players.length;
+            this.state.tricks.push(winner);
+            this.state.currentTrick = [];
+            this.state.playersTurn = winner;
+        }
+        return card;       
     }
     finishRound() {
         if (this.state.round < this.state.maxRounds) {

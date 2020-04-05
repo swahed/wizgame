@@ -273,7 +273,7 @@ describe('playing cards', function () {
             [['red', 4], ['yellow', 4], ['green', 7]],
             [['red', 9], ['green', 2], ['blue', 8]],
             [['blue', 5], ['yellow', 3], ['green', 13]],
-            [['blue', 6], ['yellow', 14], ['green', 10]]
+            [['red', 6], ['yellow', 14], ['green', 10]]
         ];
     });
 
@@ -291,6 +291,21 @@ describe('playing cards', function () {
                 let card = testGame.playCard(playerId1, 0);
                 assert.deepEqual(card, ['red', 4]);
             }
+        );
+    });
+
+    it('should only be possible to play a cards, which is are on the players hand.', function () {
+        assert.throws(
+            () => {
+                testGame.playCard(playerId1, 4);
+            },
+            { message: "Wrong card selected. Available cards: 0 - 3." }
+        );
+        assert.throws(
+            () => {
+                testGame.playCard(playerId1, -1);
+            },
+            { message: "Wrong card selected. Available cards: 0 - 3." }
         );
     });
 
@@ -332,9 +347,48 @@ describe('playing cards', function () {
         assert.doesNotThrow(
             () => {
                 let card = testGame.playCard(playerId4, 0);
-                assert.deepEqual(card, ['blue', 6]);
+                assert.deepEqual(card, ['red', 6]);
             }
         );
+    });
+
+    it('should be player 1 turn after player 4 if the game started with another player', function () {
+        testGame.state.playersTurn = 2;
+        testGame.playCard(playerId2, 0);
+        testGame.playCard(playerId3, 0);
+        testGame.playCard(playerId4, 0);
+        assert.doesNotThrow(
+            () => {
+                let card = testGame.playCard(playerId1, 0);
+            }
+        );
+    });
+
+    it('should be possible to follow a card in another color, if one does not hava color on hand.', function () {
+        testGame.playCard(playerId1, 0); // ['red', 4]
+        testGame.playCard(playerId2, 0); // ['red', 9]
+        assert.doesNotThrow(
+            () => {
+                testGame.playCard(playerId3, 0); // ['blue', 5]
+            }
+        );
+    });
+
+    it('should start the second trick after all players have placed their cards', function () {
+        testGame.playCard(playerId1, 0);
+        testGame.playCard(playerId2, 0);
+        testGame.playCard(playerId3, 0);
+        testGame.playCard(playerId4, 0);
+        assert.equal(testGame.state.tricks.length, 1);
+        assert.equal(testGame.state.currentTrick.length, 0);
+    });
+
+    it('should declare the highest card in the trump color the winner of the trick', function () {
+        testGame.playCard(playerId1, 0); // ['red', 4]
+        testGame.playCard(playerId2, 0); // ['red', 9]
+        testGame.playCard(playerId3, 0); // ['blue', 5]
+        testGame.playCard(playerId4, 0); // ['blue', 7]
+        assert.equal(testGame.state.tricks[0], playerId2);
     });
 
     it('should be possible to follow a card in the same color', function () {
@@ -349,48 +403,89 @@ describe('playing cards', function () {
     });
 
     it('should not be possible to follow a card in another color, if one has color on hand.', function () {
-        let card1 = testGame.playCard(playerId1, 0); // ['red', 4]
-        let card2;
+        // First round
+        testGame.playCard(playerId1, 0); // ['red', 4]
+        assert.equal(testGame.state.playersTurn, 2);
         assert.throws(
             () => {
                 card2 = testGame.playCard(playerId2, 1); // ['green', 2]
             },
             { message: "Wrong color, please play color red." }
         );
-    });
-
-    it('should be possible to follow a card in another color, if one does not hava color on hand.', function () {
-        let card1 = testGame.playCard(playerId1, 0); // ['red', 4]
-        let card2 = testGame.playCard(playerId2, 0); // ['red', 9]
-        assert.doesNotThrow(
+        assert.equal(testGame.state.playersTurn, 2);
+        testGame.playCard(playerId2, 0); // ['red', 9]
+        testGame.playCard(playerId3, 1); // ['yellow', 3]
+        testGame.playCard(playerId4, 0); // ['red', 6]
+        // Second round
+        testGame.playCard(playerId2, 0); // ['green', 2]
+        assert.throws(
             () => {
-                card2 = testGame.playCard(playerId3, 0); // ['blue', 5]
-            }
+                testGame.playCard(playerId3, 0); // ['blue', 5]
+            },
+            { message: "Wrong color, please play color green." }
         );
     });
 
-    it('should be the second trick after all players have placed their cards', function () {
-        testGame.playCard(playerId1, 0);
-        testGame.playCard(playerId2, 0);
-        testGame.playCard(playerId3, 0);
-        testGame.playCard(playerId4, 0);
-        assert.equal(testGame.state.tricks.length, 1);
+    it('should remove a card from a players deck after it has been played', function () {
+        let cards = testGame.getCards(playerId1);
+        let card = testGame.playCard(playerId1, 0); // ['red', 4]
+        assert.equal(cards.filter(c => c[0] === card[0] && c[1] === card[1]).length, 0);
     });
 
-    it('should declare the highest card in the trump color the winner of the trick', function () {
+    it('should be the turn of the player first who won the previous trick', function () {
         testGame.playCard(playerId1, 0); // ['red', 4]
         testGame.playCard(playerId2, 0); // ['red', 9]
         testGame.playCard(playerId3, 0); // ['blue', 5]
         testGame.playCard(playerId4, 0); // ['blue', 7]
-        assert.equal(testGame.state.tricks[0], playerId2);
+
+        assert.throws(
+            () => {
+                testGame.playCard(playerId1, 0);
+            },
+            { message: "Wrong player, please wait for turn of player 2." }
+        );
+        assert.throws(
+            () => {
+                testGame.playCard(playerId3, 0);
+            },
+            { message: "Wrong player, please wait for turn of player 2." }
+        );
+        assert.throws(
+            () => {
+                testGame.playCard(playerId4, 0);
+            },
+            { message: "Wrong player, please wait for turn of player 2." }
+        );
+        assert.doesNotThrow(
+            () => {
+                testGame.playCard(playerId2, 0); // ['blue', 5]
+            }
+        );
     });
 
-    // cannot pla same card twice
-    // should be the first players turn again after last player trick
+    it('should declare the highest card in the trump color the winner of the trick, if another player then player 1 startetd the trick.', function () {
+        testGame.playCard(playerId1, 0); // ['red', 4]
+        testGame.playCard(playerId2, 0); // ['red', 9]
+        testGame.playCard(playerId3, 1); // ['yellow', 3]
+        testGame.playCard(playerId4, 0); // ['red', 6]
 
+        testGame.playCard(playerId2, 0); // ['green', 2]
+        testGame.playCard(playerId3, 1); // ['green', 13]
+        testGame.playCard(playerId4, 1); // ['green', 10]
+        testGame.playCard(playerId1, 1); // ['green', 7]
+        assert.equal(testGame.state.tricks[1], playerId3);
 
+        testGame.playCard(playerId3, 0); // ['blue', 5]
+        testGame.playCard(playerId4, 0); // ['yellow', 14]
+        testGame.playCard(playerId1, 0); // ['yellow', 4]
+        testGame.playCard(playerId2, 0); // ['blue', 8]
+        assert.equal(testGame.state.tricks[2], playerId2);   
+    });
 
-    // it('should be eachs players turn one after the other', function () {
-    //     assert.equal(testGame.state.playersTurn, playerId1);
+    // it('should ', function () {
+        
+        
+        
     // });
+    
 });
