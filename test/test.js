@@ -1,5 +1,11 @@
-var assert = require('assert');
-var game = new require('../game').Game;
+const assert = require('assert');
+const game = new require('../game').Game;
+
+const helper = {
+    emptyPlayersDecks: function (testGame) {
+        testGame.state.decks = [[], [], [], []];
+    }
+}
 
 describe('game setup', function () {
     let testGame;
@@ -188,6 +194,7 @@ describe('starting and finishing a round in play', function () {
 
     it('should draw cards for each player', function () {
         assert.equal(testGame.state.decks.length, testGame.state.players.length);
+        helper.emptyPlayersDecks(testGame);
         testGame.finishRound();
         assert.equal(testGame.state.decks.length, testGame.state.players.length);
     });
@@ -202,6 +209,7 @@ describe('starting and finishing a round in play', function () {
         cards = testGame.getCards(playerId4);
         assert.equal(testGame.state.round, cards.length);
 
+        helper.emptyPlayersDecks(testGame);
         testGame.finishRound();
         cards = testGame.getCards(playerId1);
         assert.equal(testGame.state.round, cards.length);
@@ -212,6 +220,7 @@ describe('starting and finishing a round in play', function () {
         cards = testGame.getCards(playerId4);
         assert.equal(testGame.state.round, cards.length);
 
+        helper.emptyPlayersDecks(testGame);
         testGame.finishRound();
         cards = testGame.getCards(playerId1);
         assert.equal(testGame.state.round, cards.length);
@@ -234,19 +243,25 @@ describe('starting and finishing a round in play', function () {
     });
 
     it('should progress to next round when round is finished', function () {
+        helper.emptyPlayersDecks(testGame);
         testGame.finishRound();
         assert.equal(testGame.state.round, 2);
+        helper.emptyPlayersDecks(testGame);
         testGame.finishRound();
+        helper.emptyPlayersDecks(testGame);
         testGame.finishRound();
+        helper.emptyPlayersDecks(testGame);
         testGame.finishRound();
         assert.equal(testGame.state.round, 5);
     });
 
     it('should switch to state to complete after last round', function () {
         for (let i = 1; i < testGame.state.maxRounds; i++) {
+            helper.emptyPlayersDecks(testGame);
             testGame.finishRound();
             assert.equal(testGame.state.phase, "deal");
         }
+        helper.emptyPlayersDecks(testGame);
         testGame.finishRound();
         assert.equal(testGame.state.phase, "complete");
     });
@@ -267,13 +282,15 @@ describe('playing cards', function () {
         playerId3 = testGame.addPlayer("Bert");
         playerId4 = testGame.addPlayer("Ann");
         testGame.start();
+        helper.emptyPlayersDecks(testGame);
         testGame.finishRound();
+        helper.emptyPlayersDecks(testGame);
         testGame.finishRound();
         testGame.state.decks = [
             [['red', 4], ['yellow', 4], ['green', 7]],
             [['red', 9], ['green', 2], ['blue', 8]],
             [['blue', 5], ['yellow', 3], ['green', 13]],
-            [['red', 6], ['yellow', 14], ['green', 10]]
+            [['red', 6], ['yellow', 13], ['green', 10]]
         ];
     });
 
@@ -479,13 +496,126 @@ describe('playing cards', function () {
         testGame.playCard(playerId4, 0); // ['yellow', 14]
         testGame.playCard(playerId1, 0); // ['yellow', 4]
         testGame.playCard(playerId2, 0); // ['blue', 8]
-        assert.equal(testGame.state.tricks[2], playerId2);   
+        assert.equal(testGame.state.tricks[2], playerId2);
     });
 
-    // it('should ', function () {
-        
-        
-        
-    // });
-    
+    it('should be possible to finish a round once all the cards in the deck have been used up.', function () {
+        testGame.playCard(playerId1, 0); // ['red', 4]
+        testGame.playCard(playerId2, 0); // ['red', 9]
+        testGame.playCard(playerId3, 1); // ['yellow', 3]
+        testGame.playCard(playerId4, 0); // ['red', 6]
+        testGame.playCard(playerId2, 0); // ['green', 2]
+        testGame.playCard(playerId3, 1); // ['green', 13]
+        testGame.playCard(playerId4, 1); // ['green', 10]
+        testGame.playCard(playerId1, 1); // ['green', 7]
+        testGame.playCard(playerId3, 0); // ['blue', 5]
+        testGame.playCard(playerId4, 0); // ['yellow', 14]
+        testGame.playCard(playerId1, 0); // ['yellow', 4]
+        testGame.playCard(playerId2, 0); // ['blue', 8]
+        testGame.finishRound();
+    });
+
+    it('should not be possible to finish a round before all cards were plaed.', function () {
+        testGame.playCard(playerId1, 0); // ['red', 4]
+        testGame.playCard(playerId2, 0); // ['red', 9]
+        testGame.playCard(playerId3, 1); // ['yellow', 3]
+        testGame.playCard(playerId4, 0); // ['red', 6]
+        testGame.playCard(playerId2, 0); // ['green', 2]
+        assert.throws(
+            () => {
+                testGame.finishRound();
+            },
+            { message: "Cannot finish round while players still have cards in their decks." }
+        );
+    });
+
 });
+
+
+describe('Bidding and points', function () {
+
+    beforeEach(function () {
+        testGame = new game();
+        playerId1 = testGame.addPlayer("Joan");
+        playerId2 = testGame.addPlayer("Frank");
+        playerId3 = testGame.addPlayer("Lynda");
+        playerId4 = testGame.addPlayer("Phil");
+        testGame.start();
+        for (let i = 2; i <= 7; i++) {
+            helper.emptyPlayersDecks(testGame);
+            testGame.finishRound();        
+        } // Trick 7
+    });
+
+    // testGame.state.tricks = ["Phil","Joan", "Joan",  "Phil", "Frank", "Joan"];
+
+    it('should be possible for player 1 to make his bidding in the first round first.', function () {
+        assert.doesNotThrow(
+            () => {
+                testGame.bid(playerId1, 3);
+            }
+        );
+    });
+
+    it('The minimum bid should be 0.', function () {
+        assert.doesNotThrow(
+            () => {
+                testGame.bid(playerId1, 0);
+            }
+        );
+        assert.throws(
+            () => {
+                testGame.bid(playerId1, -1);
+            },
+            { message: "Not able to bid. Should be a value between 0-7." }
+        );
+    });
+
+    it('should not be possible to bit more than the max no of possible tricks.', function () {
+        assert.throws(
+            () => {
+                testGame.bid(playerId1, 8);
+            },
+            { message: "Not able to bid. Should be a value between 0-7." }
+        );
+    });
+
+
+    // it('should not be possible for player 2, 3, 4 to make their wager first', function () {
+    //     assert.throws(
+    //         () => {
+    //             testGame.bid(playerId2, 1);
+    //         },
+    //         { message: "Wrong player, please wait for turn of player 1." }
+    //     );
+    //     assert.throws(
+    //         () => {
+    //             testGame.bid(playerId3, 1);
+    //         },
+    //         { message: "Wrong player, please wait for turn of player 1." }
+    //     );
+    //     assert.throws(
+    //         () => {
+    //             testGame.bid(playerId4, 1);
+    //         },
+    //         { message: "Wrong player, please wait for turn of player 1." }
+    //     );
+    // });
+
+    // Only available payers
+
+    // it('should be possible for each player to make a wager in turn.', function () {
+
+    // });
+
+    // it('should be possible for player 2, 3, 4, 1 to make his bidding first in the 2nd, 3rd, 4th, 5th round.', function () {
+
+    // });
+
+    // it('should be necessary for all player to make a wager before the first card can be played.', function () {
+
+    // });
+});
+
+// TODO: Trumos
+// TODO: Jesters and Wizards

@@ -53,6 +53,9 @@ exports.Game = class game {
     }
     getCards(playerId) {
         return this.state.decks[playerId - 1];
+    } 
+    bid(playerId, cardIndex){
+        if(cardIndex < 0 || cardIndex > this.state.round) throw new Error(`Not able to bid. Should be a value between 0-${this.state.round}.`);
     }
     playCard(playerId, cardIndex){
         if (playerId !== this.state.playersTurn) throw new Error(`Wrong player, please wait for turn of player ${this.state.playersTurn}.`);
@@ -91,6 +94,7 @@ exports.Game = class game {
         return card;       
     }
     finishRound() {
+        if(!this.state.decks.filter(d => !d.length).length) throw new Error("Cannot finish round while players still have cards in their decks.");
         if (this.state.round < this.state.maxRounds) {
             this.state.round++;
             this._drawCards();
