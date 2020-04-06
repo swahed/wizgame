@@ -12,7 +12,9 @@ exports.Game = class game {
         currentTrick : [],
         tricks: [],
         maxRounds: null,
-        playersTurn : null
+        playersTurn : null,
+        bidder : 1,
+        bids : []
     }
     constructor() {
         for (const color of this.colors) {
@@ -46,7 +48,6 @@ exports.Game = class game {
     addPlayer(name) {
         if (this.state.phase != "new") throw new Error("Cannot add new player.");
         if (!name) throw new Error("New Player cannot be added without a name.");
-
         this.state.players.push(name);
         this.state.maxRounds = ~~(this.cards.length / this.state.players.length);
         return this.state.players.length;
@@ -56,8 +57,15 @@ exports.Game = class game {
     } 
     bid(playerId, cardIndex){
         if(cardIndex < 0 || cardIndex > this.state.round) throw new Error(`Not able to bid. Should be a value between 0-${this.state.round}.`);
+        if (playerId !== this.state.bidder) throw new Error(`Wrong player, please wait for turn of player ${this.state.bidder}.`);
+        // next player
+        if (++this.state.bidder > this.state.players.length){
+            this.state.bidder = 1;
+        }
+        this.state.bids.push(cardIndex);
     }
     playCard(playerId, cardIndex){
+        if(this.state.bids.length < this.state.players.length) throw new Error("All players need to place bids before cards can be played.");
         if (playerId !== this.state.playersTurn) throw new Error(`Wrong player, please wait for turn of player ${this.state.playersTurn}.`);
         if (cardIndex > this.state.decks[playerId -1].length || cardIndex < 0) throw new Error("Wrong card selected. Available cards: 0 - 3.");
         // play card
@@ -97,6 +105,9 @@ exports.Game = class game {
         if(!this.state.decks.filter(d => !d.length).length) throw new Error("Cannot finish round while players still have cards in their decks.");
         if (this.state.round < this.state.maxRounds) {
             this.state.round++;
+            if (++this.state.bidder > this.state.players.length){
+                this.state.bidder = 1;
+            }
             this._drawCards();
         }
         else {
