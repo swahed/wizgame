@@ -8,6 +8,7 @@ exports.Game = class game {
         phase: "new",
         players: [],
         decks: [],
+        scores: [],
         round: 1,
         currentTrick : [],
         tricks: [],
@@ -49,12 +50,18 @@ exports.Game = class game {
         if (this.state.phase != "new") throw new Error("Cannot add new player.");
         if (!name) throw new Error("New Player cannot be added without a name.");
         this.state.players.push(name);
+        this.state.scores.push(0);
         this.state.maxRounds = ~~(this.cards.length / this.state.players.length);
         return this.state.players.length;
     }
     getCards(playerId) {
+        // TODO: Check for existing player Id
         return this.state.decks[playerId - 1];
     } 
+    getScore(playerId) {
+        // TODO: Check for existing player Id
+        return this.state.scores[playerId - 1];
+    }
     bid(playerId, cardIndex){
         if(cardIndex < 0 || cardIndex > this.state.round) throw new Error(`Not able to bid. Should be a value between 0-${this.state.round}.`);
         if (playerId !== this.state.bidder) throw new Error(`Wrong player, please wait for turn of player ${this.state.bidder}.`);
@@ -104,6 +111,16 @@ exports.Game = class game {
     finishRound() {
         if(!this.state.decks.filter(d => !d.length).length) throw new Error("Cannot finish round while players still have cards in their decks.");
         if (this.state.round < this.state.maxRounds) {
+            this.state.players.forEach((p, i) => {
+                const tricks = this.state.tricks.filter(t => t === p).length;
+                const bids = this.state.bids[i];
+                if(bids === tricks) {
+                    this.state.scores[i]+=20;
+                    this.state.scores[i]+=tricks*10;
+                }else {
+                    this.state.scores[i]-= Math.abs(bids - tricks) *10;
+                } 
+            });
             this.state.round++;
             if (++this.state.bidder > this.state.players.length){
                 this.state.bidder = 1;

@@ -1,6 +1,9 @@
 const assert = require('assert');
 const game = new require('../game').Game;
 
+// https://www.youtube.com/watch?v=VpaV4VVMGE4
+
+
 class helper {
     _testGame;
     constructor(testGame) {
@@ -193,6 +196,18 @@ describe('game setup', function () {
         assert.notEqual(id1, id2);
     });
 
+    it('should let each new players start with 0 points.', function () {
+        let p1 = testGame.addPlayer("John");
+        assert.equal(testGame.state.scores.length, 1); // TODO: Should be in seperate test
+        assert.equal(testGame.getScore(p1), 0);
+        let p2 = testGame.addPlayer("Maria");
+        assert.equal(testGame.state.scores.length, 2);
+        assert.equal(testGame.getScore(p2), 0);
+        let p3 = testGame.addPlayer("Bert");
+        assert.equal(testGame.state.scores.length, 3);
+        assert.equal(testGame.getScore(p3), 0);
+    });
+
 });
 
 describe('starting and finishing a round in play', function () {
@@ -286,7 +301,6 @@ describe('starting and finishing a round in play', function () {
     });
 });
 
-// https://www.youtube.com/watch?v=VpaV4VVMGE4
 describe('playing cards', function () {
     let testGame;
     let playerId1;
@@ -552,7 +566,7 @@ describe('playing cards', function () {
 });
 
 
-describe('Bidding', function () {
+describe('Bidding and points', function () {
 
     beforeEach(function () {
         testGame = new game();
@@ -561,14 +575,7 @@ describe('Bidding', function () {
         playerId3 = testGame.addPlayer("Lynda");
         playerId4 = testGame.addPlayer("Phil");
         testGame.start();
-        // for (let i = 2; i <= 7; i++) {
-        //     new helper(testGame).emptyPlayersDecks();
-        //     testGame.finishRound();        
-        // } // Trick 7
     });
-
-    // testGame.state.tricks = ["Phil","Joan", "Joan",  "Phil", "Frank", "Joan"];
-
     it('should be possible for player 1 to make his bidding in the first round first.', function () {
         new helper(testGame).fastforwardToRound( 5);
         assert.doesNotThrow(
@@ -747,6 +754,41 @@ describe('Bidding', function () {
                 testGame.playCard(playerId1, 0);
             }
         );
+    });
+});
+
+describe('Bidding and points', function () {
+    const originalScore = 90;
+    let p1;
+    let p2;
+    let p3;
+    let p4;
+    beforeEach(function () {
+        testGame = new game();
+        p1 = testGame.addPlayer("Joan");
+        p2 = playerId2 = testGame.addPlayer("Frank");
+        p3 = playerId3 = testGame.addPlayer("Lynda");
+        p4 = playerId4 = testGame.addPlayer("Phil");
+        testGame.start();
+        new helper(testGame).fastforwardToRound(7);
+        testGame.state.bids = [3, 0, 0, 3];
+        testGame.state.tricks = ["Phil" , "Joan",  "Phil", "Lynda", "Joan", "Lynda", "Phil"];
+        testGame.state.scores = [originalScore, originalScore, originalScore, originalScore];
+        new helper(testGame).emptyPlayersDecks();
+        testGame.finishRound();
+    });
+
+    it('should award a player 20 points for meeting her bid.', function () {
+        assert.equal(testGame.getScore(p2), originalScore + 20);
+    });
+
+    it('should award a player additional 10 points for each trick won.', function () {
+        assert.equal(testGame.getScore(p4), originalScore + 20 + 3 * 10);
+    });
+
+    it('should deduct a player additional 10 points for each trick over or under.', function () {
+        assert.equal(testGame.getScore(p1), originalScore - 10);
+        assert.equal(testGame.getScore(p3), originalScore - 20);
     });
 });
 
