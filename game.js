@@ -1,5 +1,5 @@
 // https://www.youtube.com/watch?v=ThwR-8Tc83w
-exports.Game = class game {
+class Game {
     colors = ["blue", "red", "green", "yellow"];
     maxValue = 13;
     cards = [];
@@ -14,7 +14,7 @@ exports.Game = class game {
         tricks: [],
         maxRounds: null,
         playersTurn : null,
-        bidder : 1,
+        bidder : 1, // todo: Redundant to players turn
         bids : []
     }
     constructor() {
@@ -125,6 +125,7 @@ exports.Game = class game {
             if (++this.state.bidder > this.state.players.length){
                 this.state.bidder = 1;
             }
+            this.state.playersTurn = this.state.bidder;
             this._drawCards();
         }
         else {
@@ -132,3 +133,5 @@ exports.Game = class game {
         };
     }
 }
+// TODO: Remove when introducing webpack
+if(typeof exports !== 'undefined') exports.Game = Game; 
