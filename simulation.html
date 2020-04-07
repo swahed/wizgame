@@ -38,15 +38,26 @@
                 console.log(`Player ${player} bid ${bid}.`);
             }
 
-            // Playing cards
-            for(let player of players) {
-                const playing = Math.floor((Math.random() * round));
-                game.playCard(player, playing);
-                console.log(`Player ${player} plays ${cards[player][playing]}.`);
-            }
-            players.push(players.shift());
-            console.log(players)
-            
+            while(game.getCards(1).length) {
+                // Playing cards
+                for(let player of players) {
+                    let valid = false;
+                    let playing;
+                    while(!valid) {
+                        try {
+                            playing = Math.floor((Math.random() * round));
+                            game.playCard(player, playing);
+                            valid = true;
+                        } catch (error) {
+                            if(error.message.startsWith("Wrong color")) valid = false;
+                            else throw error;
+                        }
+                    }
+                    console.log(`Player ${player} plays ${game.state.currentTrick[game.state.currentTrick.length - 1]}.`);
+                    cards[player][playing]
+                }
+                players.push(players.shift()); 
+            }  
 
             game.finishRound();
             console.log(`Finished round ${round++}:`);
