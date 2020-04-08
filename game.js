@@ -112,19 +112,21 @@ class Game {
         if(!this.state.decks.filter(d => !d.length).length) throw new Error("Cannot finish round while players still have cards in their decks.");
         if (this.state.round < this.state.maxRounds) {
             this.state.players.forEach((p, i) => {
-                const tricks = this.state.tricks.filter(t => t === p).length;
+                const tricks = this.state.tricks.filter(t => t === i + 1).length;
                 const bids = this.state.bids[i];
                 if(bids === tricks) {
-                    this.state.scores[i]+=20;
-                    this.state.scores[i]+=tricks*10;
+                    this.state.scores[i] += 20;
+                    this.state.scores[i] += tricks * 10;
                 }else {
-                    this.state.scores[i]-= Math.abs(bids - tricks) *10;
+                    this.state.scores[i] -= Math.abs(bids - tricks) *10;
                 } 
             });
             this.state.round++;
             if (++this.state.bidder > this.state.players.length){
                 this.state.bidder = 1;
             }
+            this.state.tricks = [];
+            this.state.bids = [];
             this.state.playersTurn = this.state.bidder;
             this._drawCards();
         }

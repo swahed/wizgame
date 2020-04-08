@@ -525,6 +525,40 @@ describe('playing cards', function () {
         testGame.finishRound();
     });
 
+    it('should reset the trick pile after a round was finished.', function () {
+        testGame.playCard(playerId3, 0); // ['blue', 5]
+        testGame.playCard(playerId4, 0); // ['red', 6]
+        testGame.playCard(playerId1, 0); // ['red', 4]
+        testGame.playCard(playerId2, 2); // ['blue', 8]
+        testGame.playCard(playerId2, 1); // ['green', 2]
+        testGame.playCard(playerId3, 1); // ['green', 13]
+        testGame.playCard(playerId4, 1); // ['green', 10]
+        testGame.playCard(playerId1, 1); // ['green', 7]
+        testGame.playCard(playerId3, 0); // ['yellow', 3]
+        testGame.playCard(playerId4, 0); // ['yellow', 13]
+        testGame.playCard(playerId1, 0); // ['yellow', 4]
+        testGame.playCard(playerId2, 0); // ['red', 9]
+        testGame.finishRound();
+        assert.equal(testGame.state.tricks.length, 0);
+    });
+
+    it('should reset bids after a round was finished.', function () {
+        testGame.playCard(playerId3, 0); // ['blue', 5]
+        testGame.playCard(playerId4, 0); // ['red', 6]
+        testGame.playCard(playerId1, 0); // ['red', 4]
+        testGame.playCard(playerId2, 2); // ['blue', 8]
+        testGame.playCard(playerId2, 1); // ['green', 2]
+        testGame.playCard(playerId3, 1); // ['green', 13]
+        testGame.playCard(playerId4, 1); // ['green', 10]
+        testGame.playCard(playerId1, 1); // ['green', 7]
+        testGame.playCard(playerId3, 0); // ['yellow', 3]
+        testGame.playCard(playerId4, 0); // ['yellow', 13]
+        testGame.playCard(playerId1, 0); // ['yellow', 4]
+        testGame.playCard(playerId2, 0); // ['red', 9]
+        testGame.finishRound();
+        assert.equal(testGame.state.bids.length, 0);
+    });
+
     it('should not be possible to finish a round before all cards were placed.', function () {
         testGame.playCard(playerId3, 0); // ['blue', 5]
         testGame.playCard(playerId4, 0); // ['red', 6]
@@ -749,7 +783,7 @@ describe('Bidding and points', function () {
         testGame.start();
         new helper(testGame).fastforwardToRound(7);
         testGame.state.bids = [3, 0, 0, 3];
-        testGame.state.tricks = ["Phil" , "Joan",  "Phil", "Lynda", "Joan", "Lynda", "Phil"];
+        testGame.state.tricks = [4 , 1,  4, 3, 1, 3, 4]; // TODO: Player indexes should be zero based
         testGame.state.scores = [originalScore, originalScore, originalScore, originalScore];
         new helper(testGame).emptyPlayersDecks();
         testGame.finishRound();
@@ -768,6 +802,7 @@ describe('Bidding and points', function () {
         assert.equal(testGame.getScore(p3), originalScore - 20);
     });
 
+    // TODO: Add tests for n+1 with demo cards
     // Negative points possible?
 });
 
