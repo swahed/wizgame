@@ -3,7 +3,6 @@ const game = new require('../game').Game;
 
 // https://www.youtube.com/watch?v=VpaV4VVMGE4
 
-
 class helper {
     _testGame;
     constructor(testGame) {
