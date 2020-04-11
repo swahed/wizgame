@@ -9,11 +9,11 @@ describe('GET /json', function () {
     afterEach(function (done) {
         server.close(done);
     });
-    it('responds with json', function (done) {
-        request(server)
-            .get('/json')
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(200, done);
-    });
+    // it('responds with json', function (done) {
+    //     request(server)
+    //         .get('/json')
+    //         .set('Accept', 'application/json')
+    //         .expect('Content-Type', /json/)
+    //         .expect(200, done);
+    // });
 });

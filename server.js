@@ -1,18 +1,15 @@
 const express = require('express');
-const app = express();
+const http = require('http');
+const websocketserver = require('./websocketserver');
 
 const port = 4000;
+const app = express();
 
-app.get("/", (req, res) => {
-   res.sendFile(__dirname + '/index.html');
-});
+const server = http.createServer(app);
+const wss = websocketserver(server);
 
-app.get("/json", (req, res) => {
-    res.status(200).json({ name: 'Hello world' });
-});
-
-const server = app.listen(port, () => {
-    console.log(`Server listening at ${port}`);
+server.listen(process.env.PORT || port, () => {
+    console.log(`Server started on port ${server.address().port} :)`);
 });
 
 module.exports = server;
