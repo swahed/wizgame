@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --w"
+    "test": "mocha --w",
+    "sim": "node ./scripts/simulation.js"
   },
   "repository": {
     "type": "git",
