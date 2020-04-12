@@ -1,10 +1,16 @@
 # wizgame
 
-Start server:
-npm run start
+> Card game engine
 
-Run tests:
-npm run test
+## Build Setup
 
-Run game simulation:
-npm run sim
+``` bash
+# serve at localhost:4000
+$ npm run start
+
+# excecute tests
+$ npm run test
+
+# run a simulated game
+$ npm run sim
+```
