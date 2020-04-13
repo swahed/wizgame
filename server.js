@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
 const ws = require('ws');
-const GameService = new require('./gameservice');
+const GameService = new require('./gameService');
 
 const port = 4000;
 const app = express();
