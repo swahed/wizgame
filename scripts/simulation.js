@@ -1,4 +1,4 @@
-const Game = new require('../game').Game;
+const Game = new require('../models/game').Game;
 
 const game = new Game();
 const playerNames = ["Esther", "Troy", "Sabato", "Sander", "Heidi", "Tim"];

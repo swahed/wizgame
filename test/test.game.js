@@ -1,7 +1,7 @@
 const assert = require('assert');
 const game = new require('../game').Game;
 
-// https://www.youtube.com/watch?v=VpaV4VVMGE4
+// Step by step rules: https://www.youtube.com/watch?v=VpaV4VVMGE4
 
 class helper {
     _testGame;

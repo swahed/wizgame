@@ -1,5 +1,6 @@
 const Game = new require('./game').Game;
 
+// Store in memory
 let players = [];
 let games = [];
 
@@ -16,7 +17,7 @@ class Games {
         if (!name) throw new Error("Cannot login without a name.");
         const player = players.find(p => p === name);
         if (player) this._playerId = players.indexOf(player);
-        else this._playerId = players.push(name);
+        else this._playerId = players.push(name) - 1;
         return this._player;
     }
     join(id) {

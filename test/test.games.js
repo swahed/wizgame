@@ -68,7 +68,6 @@ describe('games', function () {
         const id2 = games.getGameId(game2);
         assert.notEqual(id1, id2);
     });
-
     
     it('should be possible join an existing game', function () {
         const game1 = games.join();
@@ -77,8 +76,6 @@ describe('games', function () {
         const game2 = games2.join(id1);
         assert.equal(game1, game2);
     });
-
-    // TODO: game.addPlayer
 
     it('should bgive a list of existing games', function () {
         games.join();
