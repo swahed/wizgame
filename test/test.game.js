@@ -1,5 +1,5 @@
 const assert = require('assert');
-const game = new require('../game').Game;
+const Game = new require('../game');
 
 // Step by step rules: https://www.youtube.com/watch?v=VpaV4VVMGE4
 
@@ -31,11 +31,11 @@ class helper {
 describe('game setup', function () {
     let testGame;
     beforeEach(function () {
-        testGame = new game();
+        testGame = new Game();
     });
 
     it('should be defined', function () {
-        assert.notEqual(game, undefined);
+        assert.notEqual(Game, undefined);
     });
 
     it('should be instatable', function () {
@@ -217,7 +217,7 @@ describe('starting and finishing a round in play', function () {
     let playerId4;
 
     beforeEach(function () {
-        testGame = new game();
+        testGame = new Game();
         playerId1 = testGame.addPlayer("John");
         playerId2 = testGame.addPlayer("Maria");
         playerId3 = testGame.addPlayer("Bert");
@@ -308,7 +308,7 @@ describe('playing cards', function () {
     let playerId4;
 
     beforeEach(function () {
-        testGame = new game();
+        testGame = new Game();
         playerId1 = testGame.addPlayer("John");
         playerId2 = testGame.addPlayer("Maria");
         playerId3 = testGame.addPlayer("Bert");
@@ -578,7 +578,7 @@ describe('playing cards', function () {
 describe('Bidding and points', function () {
 
     beforeEach(function () {
-        testGame = new game();
+        testGame = new Game();
         playerId1 = testGame.addPlayer("Joan");
         playerId2 = testGame.addPlayer("Frank");
         playerId3 = testGame.addPlayer("Lynda");
@@ -774,7 +774,7 @@ describe('Bidding and points', function () {
     let p4;
 
     beforeEach(function () {
-        testGame = new game();
+        testGame = new Game();
         p1 = testGame.addPlayer("Joan");
         p2 = playerId2 = testGame.addPlayer("Frank");
         p3 = playerId3 = testGame.addPlayer("Lynda");

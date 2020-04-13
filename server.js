@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
 const ws = require('ws');
-const GameService = new require('./gameService');
+const GameService = new require('./gameservice');
 
 const port = 4000;
 const app = express();
@@ -16,6 +16,5 @@ io.on('connection', (socket) => {
     console.log('someone connected');
     new GameService(io);
 });
-
 
 module.exports = server;

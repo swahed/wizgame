@@ -1,6 +1,6 @@
 const assert = require('assert');
 const Games = new require('../games');
-const Game = new require('../game').Game;
+const Game = new require('../game');
 
 describe('games', function () {
 

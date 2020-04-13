@@ -1,4 +1,4 @@
-const Game = new require('./game').Game;
+const Game = new require('./game');
 
 // Store in memory
 let players = [];

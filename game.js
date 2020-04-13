@@ -135,5 +135,5 @@ class Game {
         };
     }
 }
-// TODO: Remove when introducing webpack
-if(typeof exports !== 'undefined') exports.Game = Game; 
+
+module.exports = Game; 
