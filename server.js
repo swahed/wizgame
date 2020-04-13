@@ -14,7 +14,7 @@ let io = require('socket.io')(server);
 
 io.on('connection', (socket) => {
     console.log('someone connected');
-    new GameService(io);
+    new GameService(socket);
 });
 
 module.exports = server;

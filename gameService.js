@@ -3,26 +3,32 @@ const Games = new require('./games');
 class GameService {
     _games;
     _game;
-    constructor(socket) {
+    constructor(socket) { // <-- TODO: Inject socket.io server, register listener once and create/destroy games class upon connection
         const _this = this;
+
         socket.on("join server", function (data) {
             let playerName = data && data.hasOwnProperty('name') ? data.name : null;
             _this._games = new Games(playerName);
-            socket.emit('join server success');
+            socket.emit('connected to server');
         });
 
-        // socket.on("list games", function (data) {
-        //     socket.emit('games list', { games: new Games("John Doe").getList() });
-        // });
+        socket.on("list games", function (data, fn) {
+            // if(!_this._games) throw
+            socket.emit('games list updated', { 
+                games: _this._games.getList() 
+            });
+        });
 
-        // socket.on("join game", function (data) {
-        //     socket.join(room[, callback])
-        //     const gameId = data && data.hasOwnProperty('id') ? data.id : null;
-        //     game = games.join(gameId);
-        //     socket.emit('join game success', { gameId: games.getGameId(game) });
-        //     broadcast('player joined', { playerId: playerId });
-        //          io.to('room 237').emit('a new user has joined the room');
-        // });
+        socket.on("join game", function (data) {
+            const gameId = data && data.hasOwnProperty('id') ? data.id : null;
+            if(gameId) _this._game = _this._games.join(gameId);
+            else _this._game = _this._games.join();
+            socket.emit('joined game', { 
+                gameId: _this._games.getGameId(_this._game) 
+            });
+            // TODO: socket.join(room[, callback])
+            // TODO: io.to('room 237').emit('player joined', { playerId: playerId });
+        });
 
         // socket.on("start game", function (data) {
         //     game.start();
