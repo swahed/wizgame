@@ -77,7 +77,7 @@ describe('games', function () {
         assert.equal(game1, game2);
     });
 
-    it('should bgive a list of existing games', function () {
+    it('should give a list of existing games', function () {
         games.join();
         const games2 = new Games('John Doe')
         games2.join();
