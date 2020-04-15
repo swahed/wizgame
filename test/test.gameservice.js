@@ -142,7 +142,7 @@ describe('gamesservice', function () {
         testEmitter.once('join game', (data) => {
             testEmitter.emit('start game', { id: gameId });
         });
-        testEmitter.once('start game', (data) => {
+        testEmitter.once('game started', (data) => {
             assert(gs._game._started);
             done();
         });

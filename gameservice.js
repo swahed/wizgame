@@ -33,7 +33,7 @@ class GameService {
             _this._game.start();
             // TODO: socket.emit('cannot start', { message: 'Still missing 2 players'});
             // TODO: socket.emit('start game request ok');
-            // TODO: everyone clicked start -> io.to(`game#${gameId}`).emit('game started');
+            socket.emit('game started'); // TODO: Replace with: as soon as everyone clicked start -> io.to(`game#${gameId}`).emit('game started');
             // TODO: socket.to(playermsgid).emit('your bid turn');
         });
 
