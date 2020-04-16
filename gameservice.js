@@ -3,11 +3,10 @@ class GameService {
     _game;
     constructor(socket, Games = new require('./games')) { // <-- TODO: Inject socket.io server, register listener once and create/destroy games class upon connection
                                                           // <-- TODO: Implement proper dependency injection for GamesClass
-        const _this = this;
 
-        socket.on("join server", function (data) {
+        socket.on("join server", (data) => {
             let playerName = data && data.hasOwnProperty('name') ? data.name : null;
-            _this._games = new Games(playerName);
+            this._games = new Games(playerName);
             socket.emit('connected to server');
         });
 
@@ -26,13 +25,14 @@ class GameService {
                 gameId: _this._games.getGameId(_this._game)
             });
             // TODO: socket.join(`game#${gameId}`)
-            // TODO: socket.to(`game#${gameId}`).broadcast('player joined', { playerId: playerId });
+            // TODO: socket.to(`game#${gameId}`).emit('player joined', { playerId: playerId });
         });
 
         socket.on("start game", function (data) {
             _this._game.start();
             // TODO: socket.emit('cannot start', { message: 'Still missing 2 players'});
             // TODO: socket.emit('start game request ok');
+            // TODO: socket.to(`game#${gameId}`).emit('player xyz clicked ok', { playerId: playerId });
             socket.emit('game started'); // TODO: Replace with: as soon as everyone clicked start -> io.to(`game#${gameId}`).emit('game started');
             // TODO: socket.to(playermsgid).emit('your bid turn');
         });
@@ -41,10 +41,10 @@ class GameService {
             const playerId2 = data && data.hasOwnProperty('playerId') ? data.playerId : null;
             const bid = data && data.hasOwnProperty('bid') ? data.bid : 0;
             _this._game.bid(playerId2, bid);
+            // TODO: Error - Not your turn, Invalid (zu viele, zu wenig)
             // TODO: Necessary? socket.emit('place bid success');
             // TODO: socket.to(playermsgid).emit('your bid turn', msg);
-            // TODO: io.to(`game#${gameId}`).emit('player bid', { playerId: playerId2, bid: bid });
-            // TODO: Necessary? io.to(`game#${gameId}`).emit('all bids places');
+            // TODO: io.to(`game#${gameId}`).emit('player bid', { bids: bids[] });
             // TODO: socket.emit('draw cards', { deck : [...]});
             // TODO: socket.to(playermsgid).emit('your play turn', { serveColor: null });
         });
